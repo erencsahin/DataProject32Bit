@@ -1,0 +1,21 @@
+[
+  {
+    "className": "com.erencsahin.subscribers.RestSubscriber",
+    "platformName": "RestPlatform",
+    "username": "rest",
+    "password": "rest",
+    "rateList": ["PF2_USDTRY","PF2_EURUSD","PF2_GBPUSD"],
+    "host": "127.0.0.1",
+    "port": 8082
+  },
+  {
+    "className": "com.erencsahin.subscribers.TcpSubscriber",
+    "platformName": "TcpPlatform",
+    "username": "tcp",
+    "password": "tcp",
+    "rateList": ["PF1_USDTRY","PF1_EURUSD","PF1_GBPUSD"],
+    "host": "127.0.0.1",
+    "port": 8081
+  }
+
+]

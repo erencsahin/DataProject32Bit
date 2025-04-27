@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.erencsahin.coordinator.CoordinatorApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.120 s -- in com.erencsahin.coordinator.CoordinatorApplicationTests
