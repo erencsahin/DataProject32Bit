@@ -1,0 +1,80 @@
+version: '3.8'
+services:
+  # ---------- ZOOKEEPER ----------
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    container_name: toyota_zk
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  # ---------- KAFKA ----------
+  kafka:
+    image: confluentinc/cp-kafka:7.0.1
+    container_name: toyota_kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+
+  # ---------- REDIS ----------
+  redis:
+    image: redis:7-alpine
+    container_name: toyota_redis
+    ports:
+      - "6379:6379"
+
+  # ---------- POSTGRES ----------
+  postgres:
+    image: postgres:15
+    container_name: toyota_postgres
+    environment:
+      POSTGRES_DB: toyotadb
+      POSTGRES_USER: toyota
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # ---------- OPENSEARCH ----------
+  opensearch:
+    image: opensearchproject/opensearch:2.8.0
+    container_name: toyota_opensearch
+    environment:
+      - cluster.name=toyota-cluster
+      - node.name=toyota-node1
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    ports:
+      - "9200:9200"   # REST API
+      - "9600:9600"   # Performance analyzer (opsiyonel)
+
+  # ---------- OPENSEARCH DASHBOARDS (opsiyonel) ----------
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.8.0
+    container_name: toyota_opensearch_dash
+    depends_on:
+      - opensearch
+    ports:
+      - "5601:5601"
+    environment:
+      - OPENSEARCH_HOSTS=http://opensearch:9200
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+
+volumes:
+  pgdata:
+  opensearch_data:
