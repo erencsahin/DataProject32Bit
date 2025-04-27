@@ -1,13 +1,12 @@
-![image](https://github.com/user-attachments/assets/512d2c7c-3805-4cca-89e1-db8146b9aa46)﻿# FINANSAL VERI SAGLAYICILARDAN ANLIK VERI TOPLAMA VE HESAPLAMA PROJESI
+﻿# FINANSAL VERI SAGLAYICILARDAN ANLIK VERI TOPLAMA VE HESAPLAMA PROJESI
 
  Bu proje, birden fazla veri sağlayıcıdan (TCP streaming ve REST API) gelen ham Forex kurlarını toplayıp, Redis üzerinde tamponlayarak hem ham hem de türetilmiş (ortalama ve çapraz) kurları hesaplar, Kafka aracılığıyla downstream sistemlere iletir ve PostgreSQL ile OpenSearch’e yazar.
 
 ---
 
 ## Mimari Özeti
-
+![image](https://github.com/user-attachments/assets/512d2c7c-3805-4cca-89e1-db8146b9aa46)
 ```plain
-![Ekran görüntüsü 2025-04-27 192156](https://github.com/user-attachments/assets/2ca70a6b-d980-43af-9a99-30773fc09126)
 
 Subscribers
 
