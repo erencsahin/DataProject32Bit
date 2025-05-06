@@ -40,11 +40,11 @@ public class RateCalculator {
     }
 
     private void calcUsdTry() {
-        Rate a = tcpRaw.get("USDTRY"), b = restRaw.get("USDTRY");
-        if (a==null||b==null) return;
-        double bid = (a.getBid()+b.getBid())/2;
-        double ask = (a.getAsk()+b.getAsk())/2;
-        String timestamp = b.getTimestamp();
+        Rate tcpRate = tcpRaw.get("USDTRY"), restRate = restRaw.get("USDTRY");
+        if (tcpRate==null||restRate==null) return;
+        double bid = (tcpRate.getBid()+restRate.getBid())/2;
+        double ask = (tcpRate.getAsk()+restRate.getAsk())/2;
+        String timestamp = restRate.getTimestamp();
         redisService.saveAverageRate(new Rate("USDTRY", ask, bid, timestamp));
     }
 

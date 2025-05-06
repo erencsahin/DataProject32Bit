@@ -58,11 +58,11 @@ public class RedisService {
         });
     }
 
-    private String toJson(Rate r) {
+    private String toJson(Rate rate) {
         try {
-            return objectMapper.writeValueAsString(r);
+            return objectMapper.writeValueAsString(rate);
         } catch (Exception e) {
-            throw new IllegalStateException("JSON serialize failed for " + r, e);
+            throw new IllegalStateException("JSON serialize fail " + rate, e);
         }
     }
 }

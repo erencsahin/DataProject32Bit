@@ -15,6 +15,8 @@ services:
     container_name: toyota_kafka
     depends_on:
       - zookeeper
+    entrypoint: >
+      sh -c "sleep 5 && /etc/confluent/docker/run"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -52,7 +54,7 @@ services:
       - node.name=toyota-node1
       - discovery.type=single-node
       - DISABLE_SECURITY_PLUGIN=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
     ulimits:
       memlock:
         soft: -1
@@ -61,19 +63,19 @@ services:
       - opensearch_data:/usr/share/opensearch/data
     ports:
       - "9200:9200"   # REST API
-      - "9600:9600"   # Performance analyzer (opsiyonel)
+      - "9600:9600"   # Performance analyzer
 
-  # ---------- OPENSEARCH DASHBOARDS (opsiyonel) ----------
+  # ---------- OPENSEARCH DASHBOARDS ----------
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.8.0
     container_name: toyota_opensearch_dash
     depends_on:
       - opensearch
-    ports:
-      - "5601:5601"
     environment:
       - OPENSEARCH_HOSTS=http://opensearch:9200
       - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    ports:
+      - "5601:5601"
 
 volumes:
   pgdata:

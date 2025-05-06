@@ -15,8 +15,10 @@ import java.io.InputStreamReader;
 public class Coordinator implements ICoordinator {
 
     private DataCalculator calculator;
-    public Coordinator(DataCalculator calculator){
+    private ConnectivityService connectivityService;
+    public Coordinator(DataCalculator calculator,ConnectivityService connectivityService){
         this.calculator=calculator;
+        this.connectivityService=connectivityService;
     }
 
     @PostConstruct
@@ -52,17 +54,18 @@ public class Coordinator implements ICoordinator {
     @Override
     public void onConnect(String platformName, Boolean status) {
         System.out.println("[CONNECT] " + platformName + ": " + status);
+        connectivityService.update(platformName,status);
     }
 
     @Override
     public void onDisConnect(String platformName, Boolean status) {
         System.out.println("[DISCONNECT] " + platformName + ": " + status);
+        connectivityService.update(platformName,status);
     }
 
     @Override
     public void onRateAvailable(String platformName, String rateName, Rate rate) {
         System.out.println("[DATA] " + platformName + " - " + rate);
         calculator.onNewRate(platformName,rate);
-
     }
 }
