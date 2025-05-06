@@ -30,6 +30,4 @@ public class RedisConfig {
         tpl.afterPropertiesSet();
         return tpl;
     }
-
-
 }

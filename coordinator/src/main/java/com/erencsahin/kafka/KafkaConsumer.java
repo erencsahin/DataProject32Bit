@@ -3,6 +3,7 @@ package com.erencsahin.kafka;
 
 import com.erencsahin.dto.Rate;
 import com.erencsahin.opensearch.OpenSearchService;
+import com.erencsahin.repository.RateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
