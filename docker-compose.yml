@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  # ---------- ZOOKEEPER ----------
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.0.1
     container_name: toyota_zk
@@ -8,31 +8,49 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
     ports:
       - "2181:2181"
+    healthcheck:
+      test: ["CMD", "echo", "ruok | nc 127.0.0.1 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # ---------- KAFKA ----------
   kafka:
     image: confluentinc/cp-kafka:7.0.1
     container_name: toyota_kafka
     depends_on:
-      - zookeeper
-    entrypoint: >
-      sh -c "sleep 5 && /etc/confluent/docker/run"
+      zookeeper:
+        condition: service_healthy
     environment:
       KAFKA_BROKER_ID: 1
+
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
     ports:
       - "9092:9092"
+    healthcheck:
+      test: [ "CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list" ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
 
-  # ---------- REDIS ----------
+
   redis:
     image: redis:7-alpine
     container_name: toyota_redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
-  # ---------- POSTGRES ----------
   postgres:
     image: postgres:15
     container_name: toyota_postgres
@@ -44,8 +62,12 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U toyota -d toyotadb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
-  # ---------- OPENSEARCH ----------
   opensearch:
     image: opensearchproject/opensearch:2.8.0
     container_name: toyota_opensearch
@@ -62,20 +84,80 @@ services:
     volumes:
       - opensearch_data:/usr/share/opensearch/data
     ports:
-      - "9200:9200"   # REST API
-      - "9600:9600"   # Performance analyzer
+      - "9200:9200"
+      - "9600:9600"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=30s"]
+      interval: 20s
+      timeout: 15s
+      retries: 10
 
-  # ---------- OPENSEARCH DASHBOARDS ----------
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.8.0
     container_name: toyota_opensearch_dash
     depends_on:
-      - opensearch
+      opensearch:
+        condition: service_healthy
     environment:
       - OPENSEARCH_HOSTS=http://opensearch:9200
       - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
     ports:
       - "5601:5601"
+
+  coordinator:
+    build:
+      context: .
+      dockerfile: coordinator/Dockerfile
+    container_name: toyota_coordinator
+    ports:
+      - "1502:1502"
+    environment:
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/toyotadb
+      SPRING_DATASOURCE_USERNAME: toyota
+      SPRING_DATASOURCE_PASSWORD: secret
+      OPENSEARCH_HOST: opensearch
+      OPENSEARCH_PORT: 9200
+    entrypoint: ["sh", "-c", "sleep 5 && java -jar /app/app.jar"]
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+
+  rest:
+    build:
+      context: .
+      dockerfile: rest/Dockerfile
+    container_name: toyota_rest
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  tcp:
+    build:
+      context: .
+      dockerfile: tcp/Dockerfile
+    container_name: toyota_tcp
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    depends_on:
+      redis:
+        condition: service_healthy
 
 volumes:
   pgdata:

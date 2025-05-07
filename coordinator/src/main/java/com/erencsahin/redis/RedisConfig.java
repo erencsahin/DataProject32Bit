@@ -13,12 +13,11 @@ public class RedisConfig {
 
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
-        var cfg = new RedisStandaloneConfiguration("localhost", 6379);
+        var cfg = new RedisStandaloneConfiguration("redis", 6379);
         LettuceConnectionFactory cf = new LettuceConnectionFactory(cfg);
         cf.setShareNativeConnection(false);
         return cf;
     }
-
 
     @Bean
     @Primary

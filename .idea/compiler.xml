@@ -6,25 +6,18 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="Tcp" />
-        <module name="coordinator" />
-      </profile>
-      <profile name="Annotation profile for toyotaproject" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
-        </processorPath>
+        <module name="tcp" />
         <module name="rest" />
+        <module name="coordinator" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="Tcp" options="-parameters" />
-      <module name="coordinator" options="-parameters" />
-      <module name="rest" options="-parameters" />
+      <module name="coordinator" options="" />
+      <module name="rest" options="" />
+      <module name="tcp" options="" />
+      <module name="toyotaproject" options="" />
     </option>
   </component>
 </project>

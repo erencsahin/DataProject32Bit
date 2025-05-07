@@ -1,19 +1,21 @@
-# 1) Build aşaması
 FROM maven:3.9-eclipse-temurin-17 AS builder
-WORKDIR /build
-
-# Sadece ihtiyaç duyduklarımızı kopyala
-COPY pom.xml .
-COPY src ./src
-
-# mvnw yerine doğrudan mvn kullanıyoruz:
-RUN mvn clean package -DskipTests
-
-# 2) Run aşaması
-FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 
-# Oluşan jar'ı al
-COPY --from=builder /build/target/coordinator-*.jar app.jar
+# 1. Parent POM'u kopyala
+COPY pom.xml .
 
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+# 2. Tüm modül dizinlerini kopyala
+COPY rest/pom.xml ./rest/
+COPY tcp/pom.xml ./tcp/
+COPY coordinator/pom.xml ./coordinator/
+
+# 3. Sadece ilgili modülün kaynak kodunu kopyala
+COPY coordinator/src ./coordinator/src
+
+RUN mvn clean package -pl coordinator -am -DskipTests -q
+
+FROM eclipse-temurin:17-jdk-jammy
+WORKDIR /app
+COPY --from=builder /app/coordinator/target/coordinator-*.jar app.jar
+EXPOSE 1502
+ENTRYPOINT ["java","-jar","app.jar"]
