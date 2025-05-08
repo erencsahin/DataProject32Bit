@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+//veritabanındaki table.
+
 @Entity
 @Table
 @Data

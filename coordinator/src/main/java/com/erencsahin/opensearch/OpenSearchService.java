@@ -27,9 +27,12 @@ public class OpenSearchService {
                     "rateTime",rate.getTimestamp(),
                     "openSearchInsertedTime", Instant.now().toString()
             );
+
+            //id'yi tanımladığımız kısım.
             IndexRequest req=new IndexRequest("rates")
                     .id(rate.getSymbol() + ":"+rate.getTimestamp())
                     .source(rateField);
+
             client.index(req, RequestOptions.DEFAULT);
         }catch (IOException e){
             throw new RuntimeException("Opensearch'de hata var. "+rate+e);

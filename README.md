@@ -35,33 +35,23 @@ DataCalculator & RateCalculator
     Ortalamaları Redis’in DB2’sine avg:<symbol>:<timestamp> formatıyla kaydeder.
 
 RedisService
-
     DB0: REST raw verileri
-
     DB1: TCP raw verileri
-
     DB2: Hesaplanmış ortalama veriler
 
 KafkaProducer
-
     Her saniye avg:* anahtarlarını tarar, daha önce yayınlanmamışları avg-data topic’ine JSON olarak gönderir.
 
 KafkaConsumer
-
     avg-data topic’ini dinler, gelen Rate nesnelerini:
-
     PostgreSQL: JPA ile TblRates tablosuna kaydeder.
-
     OpenSearch: OpenSearchService.indexRate(...) ile rates indeksine yazar.
 
 
 TECH STACK
   -Java 21+
-
   -Maven 3.6+
-
   -Docker & Docker-Compose
-
   -Redis
   -Kafka, Zookeeper
   -PostgreSQL
@@ -79,9 +69,6 @@ java -jar target/coordinator-0.1.0.jar
 
 
 Test ve Doğrulama
-
-
-
 
 Ham Veri
   -Telnet ile localhost:8081 → subscribe-PF1_USDTRY

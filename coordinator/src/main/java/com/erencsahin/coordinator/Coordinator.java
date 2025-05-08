@@ -40,8 +40,8 @@ public class Coordinator implements ICoordinator {
 
                 for (SubscriberConfig config : subscriberConfigs) {
                     Class<?> clazz = Class.forName(config.getClassName());
-                    ISubscriber subscriber = (ISubscriber) clazz.getDeclaredConstructor().newInstance();
-                    subscriber.init(config, this);
+                    ISubscriber subscriber = (ISubscriber) clazz.getDeclaredConstructor().newInstance(); //non parameter ctor çağırılır ve nesne oluşturulur.
+                    subscriber.init(config, this); //bu şekilde de config dosyası ve Coordinator sınıf parametre olarak geçebiliyoruz.
                     new Thread(subscriber::connect).start();
                 }
             }

@@ -16,6 +16,8 @@ public class KafkaConsumer {
     private final RateRepository rateRepository;
     private final OpenSearchService openSearchService;
 
+    //kafka topic'deki veriyi dinleyen class.
+
     @KafkaListener(topics = "avg-data", groupId = "avg-consumers", containerFactory = "kafkaListenerContainerFactory")
     public void consumer(Rate rate){
         RateEntity rateEntity=new RateEntity(

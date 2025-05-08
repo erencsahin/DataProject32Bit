@@ -25,6 +25,8 @@ public class KafkaProducer {
     private final Set<String> publishedKeys = ConcurrentHashMap.newKeySet();
     private final String kafkaTopic;
 
+    //kafka topic'ine veriyi yollayan class.
+
     public KafkaProducer(
             RedisTemplate<String,String> redisTemplate,
             KafkaTemplate<String,Rate> kafkaTemplate,

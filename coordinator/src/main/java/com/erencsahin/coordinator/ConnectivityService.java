@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ConnectivityService {
+    //veri sağlayıcı platformların çalışıp çalışmadığını kontrol eden class.
     private final Set<String> disConnected= ConcurrentHashMap.newKeySet();
     public void update(String platformName,boolean connected){
         if (connected){

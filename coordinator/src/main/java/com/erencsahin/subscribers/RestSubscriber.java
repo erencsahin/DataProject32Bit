@@ -15,6 +15,10 @@ public class RestSubscriber implements ISubscriber{
     public ICoordinator coordinator;
     private final RestTemplate restTemplate=new RestTemplate();
 
+    /*
+        Önce ISubscriber subscriber = (ISubscriber) clazz.getDeclaredConstructor().newInstance(); ile parametresi constructor oluşturulur.
+        Sonra init() ile parametreler enjekte edilir.
+     */
     @Override
     public void init(SubscriberConfig subscriberConfig, ICoordinator coordinator) {
         this.coordinator=coordinator;

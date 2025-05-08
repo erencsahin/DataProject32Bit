@@ -45,7 +45,7 @@ public class TcpSubscriber implements ISubscriber {
     private void processLine(String line) {
         try {
             String[] parts = line.split("\\|");
-            if (parts.length < 4) return;
+            if (parts.length < 4) return; //veri 4 parçadan oluşmuyorsa (Rate nesnesinin proplari)
 
             String symbol = parts[0].trim();
 
@@ -60,8 +60,7 @@ public class TcpSubscriber implements ISubscriber {
             Rate rate = new Rate(symbol, bid, ask, timestamp);
             coordinator.onRateAvailable(subscriberConfig.getPlatformName(), symbol, rate);
         } catch (Exception e) {
-            System.err.println("Veri parse : " + line);
-            e.printStackTrace();
+            System.err.println("Veri parse edilemedi: " + line);
         }
     }
 

@@ -10,7 +10,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisConfig {
-
+    //3 db var ancak 3 adet lettuce factory yok. bir adet lettuce factory var.
+    //3 farklı db'yi kullanabilmemizin nedeni servis kısmındaki dinamik select.
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
         var cfg = new RedisStandaloneConfiguration("redis", 6379);
