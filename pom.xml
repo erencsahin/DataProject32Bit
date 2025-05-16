@@ -13,6 +13,7 @@
         <module>rest</module>
         <module>tcp</module>
         <module>coordinator</module>
+        <module>kafka-consumer</module>
     </modules>
 
     <properties>
