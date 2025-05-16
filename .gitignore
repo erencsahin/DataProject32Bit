@@ -1,0 +1,19 @@
+# Maven derleme çıktıları
+**/target/
+
+# IntelliJ IDEA
+*.iml
+.idea/
+*.ipr
+*.iws
+
+# Wrapper ve mvn dosyaları
+.mvn/
+mvnw
+mvnw.cmd
+
+# Alt modüllerin derleme klasörleri
+kafka-consumer/target/
+rest/target/
+tcp/target/
+coordinator/target/
