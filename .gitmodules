@@ -4,3 +4,6 @@
 [submodule "Tcp"]
 	path = Tcp
 	url = https://github.com/erencsahin/tcp.git
+[submodule "kafka-consumer"]
+	path = kafka-consumer
+	url = https://github.com/erencsahin/kafka-consumer.git
