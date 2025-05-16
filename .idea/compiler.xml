@@ -10,6 +10,15 @@
         <module name="rest" />
         <module name="coordinator" />
       </profile>
+      <profile name="Annotation profile for toyotaproject" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
+        </processorPath>
+        <module name="kafka-consumer" />
+      </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
