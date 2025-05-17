@@ -17,13 +17,15 @@
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
         </processorPath>
-        <module name="kafka-consumer" />
+        <module name="kafka-consumer-opensearch" />
+        <module name="kafka-consumer-postgresql" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="coordinator" options="" />
+      <module name="kafka-consumer-opensearch" options="" />
       <module name="rest" options="" />
       <module name="tcp" options="" />
       <module name="toyotaproject" options="" />
