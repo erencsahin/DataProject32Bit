@@ -13,7 +13,8 @@
         <module>rest</module>
         <module>tcp</module>
         <module>coordinator</module>
-        <module>kafka-consumer</module>
+        <module>kafka-consumer-postgresql</module>
+        <module>kafka-consumer-opensearch</module>
     </modules>
 
     <properties>
