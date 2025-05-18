@@ -2,7 +2,7 @@
 	path = rest
 	url = https://github.com/erencsahin/rest.git
 [submodule "Tcp"]
-	path = Tcp
+	path = tcp
 	url = https://github.com/erencsahin/tcp.git
 [submodule "kafka-consumer-postgresql"]
 	path = kafka-consumer-postgresql
