@@ -10,11 +10,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>rest</module>
-        <module>tcp</module>
         <module>coordinator</module>
         <module>kafka-consumer-postgresql</module>
-        <module>kafka-consumer-opensearch</module>
+        <module>tcp</module>
+        <module>rest</module>
     </modules>
 
     <properties>

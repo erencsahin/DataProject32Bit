@@ -7,6 +7,4 @@
 [submodule "kafka-consumer-postgresql"]
 	path = kafka-consumer-postgresql
 	url = https://github.com/erencsahin/kafka-consumer-postgresql.git
-[submodule "kafka-consumer-opensearch"]
-	path = kafka-consumer-opensearch
-	url = https://github.com/erencsahin/kafka-consumer-opensearch.git
+
