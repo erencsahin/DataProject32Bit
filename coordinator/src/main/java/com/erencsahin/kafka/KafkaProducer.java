@@ -3,7 +3,8 @@ package com.erencsahin.kafka;
 import com.erencsahin.coordinator.ConnectivityService;
 import com.erencsahin.dto.Rate;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -15,9 +16,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-@Slf4j
 public class KafkaProducer {
-
+    private final static Logger logger= LogManager.getLogger(KafkaProducer.class);
     private final RedisTemplate<String,String> redisTemplate;
     private final KafkaTemplate<String,Rate> kafkaTemplate;
     private final ConnectivityService connectivity;
@@ -42,9 +42,12 @@ public class KafkaProducer {
     //her 1 sn'de db2'de 'avg:*' formatına uygun key'leri kontrol edip publish edilmeyenleri kafkaya yollayan fonskiyon.
     @Scheduled(fixedDelayString = "${app.redis.poll-interval:1000}")
     public void sendAvg() {
+        logger.debug("sendAvg tetiklendi.");
         if (!connectivity.isHealty()) {
-            log.debug("Platformlardan birisi calismiyor, kafkaya veri gönderilmeyecek.");
+            logger.debug("Platformlardan birisi offline, kafkaya veri gönderilmeyecek.");
             return;
+        }else {
+            logger.info("Tüm veri sağlayıcı platformlar sağlıklı, avg verisi gönderilmeye başlanıyor.");
         }
 
         redisTemplate.execute((RedisCallback<Void>) conn -> {
@@ -54,7 +57,10 @@ public class KafkaProducer {
             // tüm avg:* anahtarlarını al
             Set<byte[]> rawKeys = conn.keys(redisTemplate.getStringSerializer()
                     .serialize("avg:*"));
-            if (rawKeys == null) return null;
+            if (rawKeys == null) {
+                logger.debug("avg:* pattern'ine uygun anahtar bulunamadi.");
+                return null;
+            }
 
             for (byte[] rawKey : rawKeys) {
                 String key = redisTemplate.getStringSerializer().deserialize(rawKey);
@@ -68,9 +74,9 @@ public class KafkaProducer {
                     Rate avg = objectMapper.readValue(json, Rate.class);
                     //yolladığımız yer.
                     kafkaTemplate.send(kafkaTopic, avg.getSymbol(), avg);
-                    log.debug("Published {} to topic {}", avg, kafkaTopic);
+                    logger.debug("Published {} to topic {}", avg, kafkaTopic);
                 } catch (Exception e) {
-                    log.error("Failed to deserialize or send avg for key {}", key, e);
+                    logger.error("Failed to deserialize or send avg for key {}", key, e);
                 }
             }
             return null;

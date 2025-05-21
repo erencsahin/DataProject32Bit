@@ -1,0 +1,15 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/**/*.log
+
+output.elasticsearch:
+  hosts: ["http://opensearch:9200"]
+  protocol: "http"
+  index: "filebeat-%{+yyyy.MM.dd}"
+
+setup.kibana:
+  host: "opensearch-dashboards:5601"
+
+filebeat.registry.path: /usr/share/filebeat/data/registry

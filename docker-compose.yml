@@ -176,6 +176,8 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    volumes:
+      - ./logs/rest:/var/log/rest:rw
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8082/health || exit 1"]
       interval: 10s
@@ -197,6 +199,8 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    volumes:
+      - ./logs/tcp:/var/log/tcp:rw
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 8081 || exit 1"]
       interval: 10s
@@ -231,6 +235,8 @@ services:
       - POSTGRES_PASSWORD=secret
       - OPENSEARCH_HOST=opensearch
       - OPENSEARCH_PORT=9200
+    volumes:
+      - ./logs/coordinator:/var/log/coordinator:rw
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:1502/health || exit 1"]
       interval: 10s
@@ -277,6 +283,8 @@ services:
 
       # Topic ayarları
       KAFKA_TOPIC_AVG_DATA: avg-data
+    volumes:
+      - ./logs/kafka-consumer-postgresql:/var/log/kafka-consumer-postgresql:rw
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || ps aux | grep -v grep | grep java || exit 1"]
       interval: 15s
@@ -285,6 +293,20 @@ services:
       start_period: 30s
     restart: on-failure
 
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.8.2
+    container_name: toyota_filebeat
+    user: root
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./logs:/var/log:ro
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    restart: on-failure
+
+
 volumes:
   postgres_data:
   opensearch_data:
+  filebeat_data:

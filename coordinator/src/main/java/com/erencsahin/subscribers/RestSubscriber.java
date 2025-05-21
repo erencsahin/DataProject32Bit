@@ -3,6 +3,8 @@ package com.erencsahin.subscribers;
 import com.erencsahin.coordinator.ICoordinator;
 import com.erencsahin.dto.Rate;
 import com.erencsahin.dto.SubscriberConfig;
+import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Timer;
