@@ -65,6 +65,7 @@ public class KafkaProducer {
             for (byte[] rawKey : rawKeys) {
                 String key = redisTemplate.getStringSerializer().deserialize(rawKey);
                 if (!publishedKeys.add(key)) {
+                    logger.trace("Zaten yayınlanmış olan anahtar esgeçildi.");
                     continue;  // zaten yayınlandı
                 }
                 // değeri oku -> kafkayaYolla
