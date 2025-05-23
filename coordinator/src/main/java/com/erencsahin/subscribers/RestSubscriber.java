@@ -47,7 +47,7 @@ public class RestSubscriber implements ISubscriber{
             public void run() {
                 fetchRates();
             }
-        }, 0, 1000);
+        }, 0, 10000);
     }
 
     private String buildUrl(String symbol) {

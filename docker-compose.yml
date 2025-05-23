@@ -297,14 +297,58 @@ services:
     image: docker.elastic.co/beats/filebeat:8.8.2
     container_name: toyota_filebeat
     user: root
+    # Daha verbose çalıştırma
+    command: [
+      "filebeat",
+      "-e",
+      "--strict.perms=false",
+      "-c", "/usr/share/filebeat/filebeat.yml",
+      "-v"
+    ]
     volumes:
-      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - ./logs:/var/log:ro
+      # Konfigürasyon dosyası - izinleri düzeltilmiş
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
+      # Log dizinleri - tam erişim için rw
+      - ./logs:/var/log:rw
+      # Filebeat data directory
+      - filebeat_data:/usr/share/filebeat/data:rw
+      # Docker socket (docker metadata için)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Proc filesystem (sistem bilgileri için)
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+    environment:
+      - "ELASTICSEARCH_HOSTS=opensearch:9200"
+      - "KIBANA_HOST=opensearch-dashboards:5601"
+      # Debugging için
+      - "GODEBUG=netdns=go"
     depends_on:
       opensearch:
         condition: service_healthy
+      # Logları üretecek servisler
+      coordinator:
+        condition: service_started
+      rest:
+        condition: service_started
+      tcp:
+        condition: service_started
     restart: on-failure
-
+    # Daha esnek healthcheck
+    healthcheck:
+      test: [ "CMD-SHELL", "filebeat test config -c /usr/share/filebeat/filebeat.yml || exit 1" ]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+    networks:
+      - default
+    # Kaynak limitleri
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
 
 volumes:
   postgres_data:

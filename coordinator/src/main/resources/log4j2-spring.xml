@@ -13,17 +13,11 @@
             </Policies>
             <DefaultRolloverStrategy max="7"/>
         </RollingFile>
-
-        <!-- İsteğe bağlı konsol çıktısı -->
-        <Console name="ConsoleAppender" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %c{1} - %msg%n"/>
-        </Console>
     </Appenders>
 
     <Loggers>
         <!-- Root logger tüm seviyeleri yakalar -->
         <Root level="info">
-            <AppenderRef ref="ConsoleAppender"/>
             <AppenderRef ref="FileAppender"/>
         </Root>
     </Loggers>

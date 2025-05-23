@@ -1,15 +1,164 @@
+# Filebeat konfigürasyonu - filebeat/filebeat.yml
 filebeat.inputs:
+  # Coordinator servisi logları
   - type: log
     enabled: true
     paths:
-      - /var/log/**/*.log
+      - /var/log/coordinator/*.log
+      - /var/log/coordinator/**/*.log
+    fields:
+      service: coordinator
+      environment: docker
+    fields_under_root: true
+    multiline.pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
+    multiline.negate: true
+    multiline.match: after
+    scan_frequency: 5s
+    harvester_buffer_size: 16384
+    max_bytes: 10485760
+    close_inactive: 30m
+    clean_inactive: 72h
+    ignore_older: 24h
 
+  # Kafka Consumer PostgreSQL logları
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/kafka-consumer-postgresql/*.log
+      - /var/log/kafka-consumer-postgresql/**/*.log
+    fields:
+      service: kafka-consumer-postgresql
+      environment: docker
+    fields_under_root: true
+    multiline.pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
+    multiline.negate: true
+    multiline.match: after
+    scan_frequency: 5s
+    close_inactive: 30m
+    clean_inactive: 72h
+    ignore_older: 24h
+
+  # REST Simulator logları
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/rest/*.log
+      - /var/log/rest/**/*.log
+    fields:
+      service: rest-simulator
+      environment: docker
+    fields_under_root: true
+    scan_frequency: 5s
+    close_inactive: 30m
+    clean_inactive: 72h
+    ignore_older: 24h
+
+  # TCP Simulator logları
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/tcp/*.log
+      - /var/log/tcp/**/*.log
+    fields:
+      service: tcp-simulator
+      environment: docker
+    fields_under_root: true
+    scan_frequency: 5s
+    close_inactive: 30m
+    clean_inactive: 72h
+    ignore_older: 24h
+
+  # Genel log paternleri için wildcard
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/*/*.log
+      - /var/log/*/*/*.log
+    exclude_files: ['\.gz$', '\.zip$']
+    fields:
+      environment: docker
+    fields_under_root: true
+    scan_frequency: 5s
+    close_inactive: 30m
+
+# Global ayarlar
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+# Registry ayarları - önemli!
+filebeat.registry:
+  path: /usr/share/filebeat/data/registry
+  file_permissions: 0600
+  flush: 1s
+
+# Çıktı konfigürasyonu
 output.elasticsearch:
-  hosts: ["http://opensearch:9200"]
+  hosts: ["opensearch:9200"]
   protocol: "http"
-  index: "filebeat-%{+yyyy.MM.dd}"
+  username: ""
+  password: ""
+  template.enabled: false
+  index: "toyota-logs-%{+yyyy.MM.dd}"
+  bulk_max_size: 50
+  flush_min_events: 1
+  flush_timeout: 1s
+  # OpenSearch uyumluluğu için
+  allow_older_versions: true
+  # License ve monitoring indekslerini devre dışı bırak
+  check_exists: false
 
-setup.kibana:
-  host: "opensearch-dashboards:5601"
+# İndeks template - basitleştirilmiş
+setup.template:
+  enabled: false
 
-filebeat.registry.path: /usr/share/filebeat/data/registry
+# ILM devre dışı (OpenSearch için)
+setup.ilm.enabled: false
+
+# Kibana/Dashboards ayarları
+setup.dashboards:
+  enabled: false
+
+# Logging - daha detaylı
+logging.level: debug
+logging.to_files: true
+logging.files:
+  path: /usr/share/filebeat/logs
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+logging.selectors: ["*"]
+
+# Monitoring - OpenSearch ile uyumlu değil, kapat
+monitoring.enabled: false
+
+# Processors
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_docker_metadata:
+      host: "unix:///var/run/docker.sock"
+      match_fields: ["system.process.cgroup.id"]
+      match_pids: ["process.pid", "process.ppid"]
+      match_source: true
+      match_source_index: 4
+      match_short_id: false
+      cleanup_timeout: 60
+      labels.dedot: false
+      skip_non_docker: false
+  - timestamp:
+      field: "@timestamp"
+      layouts:
+        - '2006-01-02T15:04:05.000Z'
+        - '2006-01-02T15:04:05Z'
+      test:
+        - '2025-05-22T20:26:02.460Z'
+
+# Güvenlik
+http.enabled: false
+
+# Queue ayarları
+queue.mem:
+  events: 4096
+  flush.min_events: 1
+  flush.timeout: 1s
