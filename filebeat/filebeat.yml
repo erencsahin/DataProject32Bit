@@ -68,58 +68,29 @@ filebeat.inputs:
     clean_inactive: 72h
     ignore_older: 24h
 
-  # Genel log paternleri için wildcard
-  - type: log
-    enabled: true
-    paths:
-      - /var/log/*/*.log
-      - /var/log/*/*/*.log
-    exclude_files: ['\.gz$', '\.zip$']
-    fields:
-      environment: docker
-    fields_under_root: true
-    scan_frequency: 5s
-    close_inactive: 30m
-
 # Global ayarlar
 filebeat.config.modules:
   path: ${path.config}/modules.d/*.yml
   reload.enabled: false
 
-# Registry ayarları - önemli!
+# Registry ayarları
 filebeat.registry:
   path: /usr/share/filebeat/data/registry
   file_permissions: 0600
   flush: 1s
 
-# Çıktı konfigürasyonu
-output.elasticsearch:
-  hosts: ["opensearch:9200"]
-  protocol: "http"
-  username: ""
-  password: ""
-  template.enabled: false
-  index: "toyota-logs-%{+yyyy.MM.dd}"
-  bulk_max_size: 50
-  flush_min_events: 1
-  flush_timeout: 1s
-  # OpenSearch uyumluluğu için
-  allow_older_versions: true
-  # License ve monitoring indekslerini devre dışı bırak
-  check_exists: false
+# Çıktı konfigürasyonu: Logstash’e gönderim
+output.logstash:
+  # Logstash container adı ve portu
+  hosts: ["logstash:5044"]
 
-# İndeks template - basitleştirilmiş
-setup.template:
-  enabled: false
 
-# ILM devre dışı (OpenSearch için)
+# Index template, ILM, dashboard vb. ayarları artık kullanılmayacak
+setup.template.enabled: false
 setup.ilm.enabled: false
+setup.dashboards.enabled: false
 
-# Kibana/Dashboards ayarları
-setup.dashboards:
-  enabled: false
-
-# Logging - daha detaylı
+# Logging
 logging.level: debug
 logging.to_files: true
 logging.files:
@@ -129,7 +100,7 @@ logging.files:
   permissions: 0644
 logging.selectors: ["*"]
 
-# Monitoring - OpenSearch ile uyumlu değil, kapat
+# Monitoring kapalı
 monitoring.enabled: false
 
 # Processors
@@ -154,7 +125,7 @@ processors:
       test:
         - '2025-05-22T20:26:02.460Z'
 
-# Güvenlik
+# HTTP ayarları
 http.enabled: false
 
 # Queue ayarları

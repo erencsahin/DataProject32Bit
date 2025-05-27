@@ -4,6 +4,5 @@
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/kafka-consumer-postgresql" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/rest" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/tcp" vcs="Git" />
   </component>
 </project>

@@ -177,7 +177,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     volumes:
-      - ./logs/rest:/var/log/rest:rw
+      - ./logs/rest:/var/log/rest
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8082/health || exit 1"]
       interval: 10s
@@ -200,7 +200,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     volumes:
-      - ./logs/tcp:/var/log/tcp:rw
+      - ./logs/tcp:/var/log/tcp
     healthcheck:
       test: ["CMD-SHELL", "nc -z localhost 8081 || exit 1"]
       interval: 10s
@@ -236,7 +236,7 @@ services:
       - OPENSEARCH_HOST=opensearch
       - OPENSEARCH_PORT=9200
     volumes:
-      - ./logs/coordinator:/var/log/coordinator:rw
+      - ./logs/coordinator:/var/log/coordinator
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:1502/health || exit 1"]
       interval: 10s
@@ -284,7 +284,7 @@ services:
       # Topic ayarları
       KAFKA_TOPIC_AVG_DATA: avg-data
     volumes:
-      - ./logs/kafka-consumer-postgresql:/var/log/kafka-consumer-postgresql:rw
+      - ./logs/kafka-consumer-postgresql:/var/log/kafka-consumer-postgresql
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || ps aux | grep -v grep | grep java || exit 1"]
       interval: 15s
@@ -293,39 +293,44 @@ services:
       start_period: 30s
     restart: on-failure
 
+  logstash:
+    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:7.13.4
+    container_name: toyota_logstash
+    restart: on-failure
+    volumes:
+      - ./filebeat/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    ports:
+      - "5044:5044"      # Beats input
+    networks:
+      - default
+    # Logstash 7.12+ Monitoring API 9600 portunu açabilirsiniz (opsiyonel)
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9600/?pretty || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   filebeat:
-    image: docker.elastic.co/beats/filebeat:8.8.2
+    image: docker.elastic.co/beats/filebeat-oss:7.12.1
     container_name: toyota_filebeat
     user: root
-    # Daha verbose çalıştırma
-    command: [
-      "filebeat",
-      "-e",
-      "--strict.perms=false",
-      "-c", "/usr/share/filebeat/filebeat.yml",
-      "-v"
-    ]
+    command:
+      - filebeat
+      - -e
+      - --strict.perms=false
+      - -c
+      - /usr/share/filebeat/filebeat.yml
+      - -v
     volumes:
-      # Konfigürasyon dosyası - izinleri düzeltilmiş
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
-      # Log dizinleri - tam erişim için rw
       - ./logs:/var/log:rw
-      # Filebeat data directory
       - filebeat_data:/usr/share/filebeat/data:rw
-      # Docker socket (docker metadata için)
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # Proc filesystem (sistem bilgileri için)
       - /proc:/hostfs/proc:ro
       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
-    environment:
-      - "ELASTICSEARCH_HOSTS=opensearch:9200"
-      - "KIBANA_HOST=opensearch-dashboards:5601"
-      # Debugging için
-      - "GODEBUG=netdns=go"
     depends_on:
-      opensearch:
-        condition: service_healthy
-      # Logları üretecek servisler
+      logstash:
+        condition: service_started
       coordinator:
         condition: service_started
       rest:
@@ -333,7 +338,6 @@ services:
       tcp:
         condition: service_started
     restart: on-failure
-    # Daha esnek healthcheck
     healthcheck:
       test: [ "CMD-SHELL", "filebeat test config -c /usr/share/filebeat/filebeat.yml || exit 1" ]
       interval: 30s
@@ -342,13 +346,13 @@ services:
       start_period: 60s
     networks:
       - default
-    # Kaynak limitleri
     deploy:
       resources:
         limits:
           memory: 512M
         reservations:
           memory: 256M
+
 
 volumes:
   postgres_data:

@@ -12,6 +12,10 @@
 mvnw
 mvnw.cmd
 
+# Log dosyaları
+logs/
+*.log
+
 # Alt modüllerin derleme klasörleri
 kafka-consumer/target/
 rest/target/
