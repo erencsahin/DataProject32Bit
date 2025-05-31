@@ -243,6 +243,48 @@ services:
       start_period: 10s
     restart: on-failure
 
+  # ────────── OPENSEARCH CONSUMER ──────────
+  kafka-consumer-opensearch:
+    build:
+      context: .
+      dockerfile: kafka-consumer-opensearch/Dockerfile
+    container_name: toyota_consumer_os
+    depends_on:
+      kafka-setup:
+        condition: service_completed_successfully
+      opensearch:
+        condition: service_healthy
+    environment:
+      # Kafka Ayarları
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      SPRING_KAFKA_CONSUMER_GROUP_ID: os-consumers
+      SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
+      SPRING_KAFKA_CONSUMER_ENABLE_AUTO_COMMIT: false
+      SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER: org.apache.kafka.common.serialization.StringDeserializer
+      SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER: org.springframework.kafka.support.serializer.JsonDeserializer
+      SPRING_KAFKA_LISTENER_ACK_MODE: manual_immediate
+
+      # OpenSearch Ayarları
+      OPENSEARCH_HOST: opensearch
+      OPENSEARCH_PORT: 9200
+
+      # Logging
+      LOGGING_LEVEL_ORG_APACHE_KAFKA: DEBUG
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_KAFKA: DEBUG
+
+      # Topic
+      KAFKA_TOPIC_AVG_DATA: avg-data
+    volumes:
+      - ./logs/kafka-consumer-opensearch:/var/log/kafka-consumer-opensearch
+    healthcheck:
+      test: [ "CMD-SHELL", "ps aux | grep -v grep | grep java || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: on-failure
+
+
   # ────────── PG CONSUMER ──────────
   kafka-consumer-postgresql:
     build:

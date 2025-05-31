@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/coordinator/coordinator.iml" filepath="$PROJECT_DIR$/coordinator/coordinator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/toyotaproject.iml" filepath="$PROJECT_DIR$/toyotaproject.iml" />
     </modules>
   </component>
 </project>

@@ -10,16 +10,14 @@
         <module name="rest" />
         <module name="coordinator" />
         <module name="kafka-consumer-postgresql" />
+        <module name="kafka-consumer-opensearch" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="kafka-consumer-opensearch" target="17" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="coordinator" options="" />
-      <module name="kafka-consumer-opensearch" options="-parameters" />
+      <module name="kafka-consumer-opensearch" options="" />
       <module name="rest" options="" />
       <module name="tcp" options="" />
       <module name="toyotaproject" options="" />

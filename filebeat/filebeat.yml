@@ -38,6 +38,24 @@ filebeat.inputs:
     clean_inactive: 72h
     ignore_older: 24h
 
+  # Kafka Consumer PostgreSQL logları
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/kafka-consumer-opensearch/*.log
+      - /var/log/kafka-consumer-opensearch/**/*.log
+    fields:
+      service: kafka-consumer-opensearch
+      environment: docker
+    fields_under_root: true
+    multiline.pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
+    multiline.negate: true
+    multiline.match: after
+    scan_frequency: 5s
+    close_inactive: 30m
+    clean_inactive: 72h
+    ignore_older: 24h
+
   # REST Simulator logları
   - type: log
     enabled: true
