@@ -91,13 +91,13 @@ docker-compose up -d --build
   -Password: admin
 
 - Sol kısımdan Register → Server
-   - Aşağıdaki bilgileri girin:
-      - Hostname: postgres
-      - Port: 5432
-      - Maintenance database: toyotadb
-      - Username: toyota
-      - Password: secret
-        Sol menüden toyotadb → Schemas → public → Tables altında tablomuzu görüntüleyebilirsiniz.
+    - Aşağıdaki bilgileri girin:
+        - Hostname: postgres
+        - Port: 5432
+        - Maintenance database: toyotadb
+        - Username: toyota
+        - Password: secret
+          Sol menüden toyotadb → Schemas → public → Tables altında tablomuzu görüntüleyebilirsiniz.
 
 
 **Kafka**
