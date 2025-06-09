@@ -5,91 +5,92 @@
 ---
 
 ## Mimari Özeti
-![image](https://github.com/user-attachments/assets/512d2c7c-3805-4cca-89e1-db8146b9aa46)
+![file_2025-06-07_12 13 52 1](https://github.com/user-attachments/assets/2871dc95-e22b-4377-bac3-249c6c47de2f)
 ```plain
 
-Subscribers
+## Tech Stack
+    -Java 21+
+    -Maven 3.6+
+    -Docker & Docker-Compose
+    -Redis
+    -Kafka, Zookeeper
+    -PostgreSQL
+    -OpenSearch 
+  
+## Submodules
+- **coordinator**
+- **kafka-consumer-postgresql**
+- **kafka-consumer-opensearch**
+- **tcp**
+- **rest**
+##  coordinator submodule
 
-    TCPSubscriber: Socket üzerinden subscribe-PF1_USDTRY gibi komutlarla stream’ten veri alır.
+- Subscriber sınıfları dinamik olarak yükler ve yönetir.
+- Subscriber sınıflardan gelen verileri dinamik olarak hesaplar.
+- Ham ve hesaplanmış verileri farklı redis kümelerine yazar.
+- KafkaProducer burada yer alır.
+## kafka-consumer-postgresql
+- Yalnızca Postgresql veri aktarımıyla sorumlu olan KafkaConsumer burada yer alır.
+- Verinin %1'lik dalgalanmaları burada filtrelenir.
+- Yeni gelen veri eski veriden %1 az veya fazla ise bu veri esgeçilir ve eski veri yazılır.
 
-    RestSubscriber: Her saniye HTTP GET ile /api/rates?symbol=... çağırır.
+## kafka-consumer-opensearch
+- Yalnızca Opensearch veri aktarımıyla sorumlu olan KafkaConsumer burada yer alır.
+- Verinin %1'lik dalgalanmaları burada filtrelenir.
+- Yeni gelen veri eski veriden %1 az veya fazla ise bu veri esgeçilir ve veri yazılmaz.
+## tcp (PF_1)
+- TCP protokolü ile streaming veri sağlayıcı simülatörünü barındırır veya tüketir.
+- Gerçekçi veri üretimden sorumludur.
+## rest (PF_2)
+- REST API üzerinden periyodik rate sağlama.
+- Gerçekçi veri üretimden sorumludur
+## Kurulum ve Çalıştırma
+    git clone --recurse-submodules https://github.com/erencsahin/DataProject32Bit.git
+    cd DataProject32Bit
 
-Coordinator
+- Modülleri derle
 
-    Runtime’da subscribers.json’dan abone sınıflarını (ISubscriber) yükler, her birini ayrı bir thread’de başlatır.
+    mvn clean package -DskipTests
 
-    Gelen her Rate(symbol, bid, ask, timestamp) nesnesini DataCalculator’a iletir.
+- Docker ile ayağa kaldır
 
-DataCalculator & RateCalculator
+    docker-compose up -d --build
+## Portlar
+- tcp -> http://localhost:8081
+- rest -> http://localhost:8082/api/rates
+- redis -> http://localhost:6379
+- opensearchDashboard -> http://localhost:5601
+- kafka -> http://localhost:9092
+- postgres -> http://localhost:5432
+- pgadmin -> http://localhost:5050
+## Test
 
-    Ham TCP ve REST verilerini RedisService ile Redis’e yazar.
+- **Redis** 
+    - redis-cli -h localhost -p 6379
+    - SELECT 2
+    - KEYS avg:*
+    - GET avg:USDTRY:2025-06-09T12:00:00.000
 
-    calcUsdTry, calcCross("EURTRY","EURUSD"), calcCross("GBPTRY","GBPUSD") yöntemleriyle:
+- **PostgreSQL** (PgAdmin ile)
+    - Tarayıcıdan http://localhost:5050 adresine gidiniz. 
+    - username "admin@admin.com" || password "admin"
+    - Sol kısımdan **Register** -> **Server**
+    - Ekrana çıkan pencerede istediğiniz ismi verin.
+    - Connection
+        - Hostname: postgres
+        - port: 5432
+        - maintenance database: toyotadb
+        - username: toyota
+        - password: secret
+    - Şeklinde kaydettikten sonra sol menüden toyotadb server’ına tıklayıp, 
+    - Schemas > public > Tables altında tablomuzu görüntüleyebilirsiniz.
 
-    USDTRY = (PF1 + PF2) / 2
+- **Kafka**
+    - Projemizde terminali açıp.
+        - **kafka-console-consumer --bootstrap-server localhost:9092 --topic avg-data --from-beginning**
+    - Veriler karşınıza gelecektir.
 
-    EURTRY = USD_mid × EURUSD_mid
-
-    GBPTRY = USD_mid × GBPUSD_mid
-
-    Ortalamaları Redis’in DB2’sine avg:<symbol>:<timestamp> formatıyla kaydeder.
-
-RedisService
-    DB0: REST raw verileri
-    DB1: TCP raw verileri
-    DB2: Hesaplanmış ortalama veriler
-
-KafkaProducer
-    Her saniye avg:* anahtarlarını tarar, daha önce yayınlanmamışları avg-data topic’ine JSON olarak gönderir.
-
-KafkaConsumer
-    avg-data topic’ini dinler, gelen Rate nesnelerini:
-    PostgreSQL: JPA ile TblRates tablosuna kaydeder.
-    OpenSearch: OpenSearchService.indexRate(...) ile rates indeksine yazar.
-
-
-TECH STACK
-  -Java 21+
-  -Maven 3.6+
-  -Docker & Docker-Compose
-  -Redis
-  -Kafka, Zookeeper
-  -PostgreSQL
-  -OpenSearch
-
-Başlarken
-
-# Cluster ve bağımlılıkları ayağa kaldır
-docker-compose down -v
-docker-compose up -d
-
-# Maven ile uygulamayı derle ve çalıştır
-./mvnw clean package
-java -jar target/coordinator-0.1.0.jar
-
-
-Test ve Doğrulama
-
-Ham Veri
-  -Telnet ile localhost:8081 → subscribe-PF1_USDTRY
-  -Postman ile GET http://localhost:8082/api/rates?symbol=PF2_USDTRY
-
-Redis
-  redis-cli -p 6379  
-  SELECT 2
-  KEYS avg:*
-  GET avg:USDTRY:2025-...
-
-Kafka
-  kafka-console-consumer --bootstrap-server localhost:9092 \
-  --topic avg-data --from-beginning \
-  --property print.key=true
-
-OpenSearch Dashboards
-  http://localhost:5601 → Discover → index pattern = rates
-  Dev Tools:
-    GET rates/_search
-    {
-      "size":10,
-      "sort":[{"rateTime":{"order":"desc"}}]
-    }
+- **Opensearch Dashboard**
+    - http://localhost:5601 adresine gidiniz.
+    - Index pattern olarak "**rates**" ve "**toyota-logs-<BulundugumuzTarih**> şeklinde 2 adet pattern çıkacaktır. Ekliyoruz.
+    - Soldaki menüden **discover**'a tıklayıp verilerimizi görebiliriz.
