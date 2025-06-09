@@ -8,6 +8,7 @@
 ![file_2025-06-07_12 13 52 1](https://github.com/user-attachments/assets/2871dc95-e22b-4377-bac3-249c6c47de2f)
 ```plain
 
+
 ## **Tech Stack**
 - Java 21+
 - Maven 3.6+
@@ -49,7 +50,7 @@
 - Gerçekçi veri üretiminden sorumludur.
 
 ## **Kurulum ve Çalıştırma**
-```bash
+
 git clone --recurse-submodules https://github.com/erencsahin/DataProject32Bit.git
 cd DataProject32Bit
 
@@ -58,6 +59,7 @@ mvn clean package -DskipTests
 
 # Docker ile ayağa kaldır
 docker-compose up -d --build
+
 
 ## **Portlar**
 - tcp → http://localhost:8081
@@ -77,7 +79,7 @@ docker-compose up -d --build
 - KEYS avg:*
 - GET avg:USDTRY:2025-06-09T12:00:00.000
 
-** PostgreSQL** (PgAdmin ile)
+**PostgreSQL** (PgAdmin ile)
 - Tarayıcıdan http://localhost:5050 adresine gidiniz.
    -Username: admin@admin.com
    -Password: admin
